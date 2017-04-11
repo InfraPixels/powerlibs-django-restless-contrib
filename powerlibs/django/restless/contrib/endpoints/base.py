@@ -1,10 +1,6 @@
 from cached_property import cached_property
 
 from django.conf import settings
-from django.forms.models import model_to_dict
-
-from powerlibs.django.restless.http import HttpError, Http200
-from powerlibs.django.restless.modelviews import DetailEndpoint as RestlessDetailEndpoint, _get_form
 
 
 class PaginatedEndpointMixin:
@@ -60,27 +56,3 @@ class SoftDeletableEndpointMixin:
             instance.save()
 
         return {}
-
-
-class DetailEndpoint(RestlessDetailEndpoint):
-    def patch(self, request, *args, **kwargs):
-        """Update the object represented by this endpoint."""
-
-        # if 'PATCH' not in self.methods:
-        #     raise HttpError(405, 'Method Not Allowed')
-
-        Form = _get_form(self.form, self.model)
-        instance = self.get_instance(request, *args, **kwargs)
-
-        form_data = model_to_dict(instance)
-        form_data.update(request.data)
-
-        form = Form(
-            form_data,
-            request.FILES,
-            instance=instance
-        )
-        if form.is_valid():
-            obj = form.save()
-            return Http200(self.serialize(obj))
-        raise HttpError(400, 'Invalid data', errors=form.errors)
