@@ -6,7 +6,7 @@ try:
 except ImportError:
     from distutils.core import setup
 
-version = '0.0.1'
+version = '0.0.2'
 requires = []
 
 with open('README.md') as f:
@@ -24,7 +24,7 @@ setup(
     author_email='cleberman@gmail.com',
     url='https://github.com/Dronemapp/powerlibs-django-restless-contrib',
     license=license,
-    packages=['powerlibs.django.restless.contrib'],
+    packages=['powerlibs.django.restless.contrib', 'powerlibs.django.restless.contrib.endpoints'],
     package_data={'': ['LICENSE', 'README.md']},
     include_package_data=True,
     install_requires=requires,
