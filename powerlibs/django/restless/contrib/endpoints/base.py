@@ -46,7 +46,7 @@ class FilteredEndpointMixin:
         return queryset.filter(**filter_args)
 
 
-class SoftDeletableEndpointMixin:
+class SoftDeletableDetailEndpointMixin:
     def delete(self, request, *args, **kwargs):
         instance = self.get_instance(request, *args, **kwargs)
 
@@ -56,3 +56,9 @@ class SoftDeletableEndpointMixin:
             instance.save()
 
         return {}
+
+
+class SoftDeletableListEndpointMixin:
+    def get_query_set(self, request, *args, **kwargs):
+        queryset = super().get_query_set(request, *args, **kwargs)
+        return queryset.filter(deleted=False)
