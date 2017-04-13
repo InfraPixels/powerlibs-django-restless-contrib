@@ -28,7 +28,7 @@ class PaginatedEndpointMixin:
 
 class FilteredEndpointMixin:
     @cached_property
-    def model_fields(self):  # pragma: no cover
+    def model_fields(self):
         return tuple(f.name for f in self.model._meta.fields)
 
     def get_query_set(self, request, *args, **kwargs):

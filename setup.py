@@ -3,8 +3,10 @@ try:
 except ImportError:
     from distutils.core import setup
 
-version = '0.3.0'
-requires = []
+version = '0.4.0'
+
+with open('requirements/production.txt') as requirements_file:
+    requires = [line for line in requirements_file]
 
 with open('README.md') as f:
     readme = f.read()

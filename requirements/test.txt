@@ -1,0 +1,8 @@
+django>=1.10
+factory-boy
+pytest
+pytest-cache
+pytest-cov
+pytest-django
+coverage
+flake8
