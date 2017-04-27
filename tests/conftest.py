@@ -2,6 +2,7 @@ import pytest
 from unittest import mock
 
 from powerlibs.django.restless.contrib.endpoints import PaginatedEndpointMixin, FilteredEndpointMixin, SoftDeletableDetailEndpointMixin, SoftDeletableListEndpointMixin
+from powerlibs.django.restless.contrib.endpoints.nested import NestedEntitiesDetailEndpointMixin, NestedEntitiesListEndpointMixin
 
 
 class MockedQuerySet(list):
@@ -46,6 +47,29 @@ class Endpoint:
     get_query_set = mock.Mock(return_value=mocked_queryset(instances()))
 
 
+class DetailEndpoint(Endpoint):
+    field_1 = mock.Mock()
+    field_1.configure_mock(name='id')
+    field_2 = mock.Mock()
+    field_2.configure_mock(name='name')
+    related_model = mock.Mock()
+    related_model.configure_mock(name='related_model')
+
+    foreign_keys = ['related_model']
+
+    get = mock.Mock(return_value={
+        'id': 1,
+        'name': 'TEST NAME',
+    })
+
+    get_instance = mock.Mock(return_value=instances()[0])
+    model = mock.Mock(
+        _meta=mock.Mock(
+            fields=(field_1, field_2)
+        )
+    )
+
+
 @pytest.fixture
 def filtered_endpoint():
     class MyClass(FilteredEndpointMixin, Endpoint):
@@ -56,17 +80,8 @@ def filtered_endpoint():
 
 @pytest.fixture
 def original_filtered_endpoint():
-    field_1 = mock.Mock()
-    field_1.configure_mock(name='id')
-    field_2 = mock.Mock()
-    field_2.configure_mock(name='name')
-
-    class MyClass(FilteredEndpointMixin, Endpoint):
-        model = mock.Mock(
-            _meta=mock.Mock(
-                fields=(field_1, field_2)
-            )
-        )
+    class MyClass(FilteredEndpointMixin, DetailEndpoint):
+        pass
 
     return MyClass()
 
@@ -107,6 +122,24 @@ def soft_deletable_detail_endpoint_with_deleted_instance():
 @pytest.fixture
 def soft_deletable_list_endpoint():
     class MyClass(SoftDeletableListEndpointMixin, Endpoint):
+        pass
+
+    obj = MyClass()
+    return obj
+
+
+@pytest.fixture
+def nested_list_endpoint():
+    class MyClass(NestedEntitiesListEndpointMixin, Endpoint):
+        pass
+
+    obj = MyClass()
+    return obj
+
+
+@pytest.fixture
+def nested_detail_endpoint():
+    class MyClass(NestedEntitiesDetailEndpointMixin, DetailEndpoint):
         pass
 
     obj = MyClass()
