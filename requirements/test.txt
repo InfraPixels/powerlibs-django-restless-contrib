@@ -1,3 +1,4 @@
+-r production.txt
 django>=1.10
 factory-boy
 pytest

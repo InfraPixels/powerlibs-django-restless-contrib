@@ -1,1 +1,3 @@
 cached_property
+
+git+https://github.com/DroneMapp/powerlibs-django-restless.git
