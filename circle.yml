@@ -1,0 +1,18 @@
+machine:
+    python:
+        version: 3.6.0
+
+dependencies:
+    pre:
+        - pip install -U -r requirements/test.txt
+
+test:
+    pre:
+        - flake8 -v --ignore=E501 powerlibs/
+
+    override:
+        - pip install -U "git+file://$PWD"
+        - mv powerlibs x && PYTHONPATH=. py.test
+        - cp .coverage $CIRCLE_ARTIFACTS/
+        - mv htmlcov/ $CIRCLE_ARTIFACTS/
+        - coverage-badge -o $CIRCLE_ARTIFACTS/coverage.svg
