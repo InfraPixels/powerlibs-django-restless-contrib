@@ -70,6 +70,19 @@ class DetailEndpoint(Endpoint):
     )
 
 
+class ListEndpoint(DetailEndpoint):
+    get = mock.Mock(return_value=[
+        {
+            'id': 1,
+            'name': 'TEST 1',
+        },
+        {
+            'id': 2,
+            'name': 'TEST 2',
+        },
+    ])
+
+
 @pytest.fixture
 def filtered_endpoint():
     class MyClass(FilteredEndpointMixin, Endpoint):
@@ -130,7 +143,7 @@ def soft_deletable_list_endpoint():
 
 @pytest.fixture
 def nested_list_endpoint():
-    class MyClass(NestedEntitiesListEndpointMixin, Endpoint):
+    class MyClass(NestedEntitiesListEndpointMixin, ListEndpoint):
         pass
 
     obj = MyClass()
