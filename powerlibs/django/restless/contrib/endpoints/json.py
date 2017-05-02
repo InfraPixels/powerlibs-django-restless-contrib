@@ -8,6 +8,12 @@ class JSONFieldsEndpoint():
             if class_name in ('HStoreField', 'JSONField'):
                 yield (field.name, class_name)
 
+    def treat_sent_data(self, request):
+        for field_name, geometry_type in self.get_json_fields_and_types():
+            value = request.data.get(field_name, None)
+            if value:
+                request.data[field_name] = json.dumps(value)
+
 
 class JSONFieldDetailEndpointMixin(JSONFieldsEndpoint):
     # Placeholder for the day we actualy use a PATCH method.
@@ -18,6 +24,14 @@ class JSONFieldDetailEndpointMixin(JSONFieldsEndpoint):
             serialized_data[field_name] = eval(serialized_data[field_name])
 
         return serialized_data
+
+    def patch(self, request, *args, **kwargs):
+        self.treat_sent_data(request)
+        return super().patch(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        self.treat_sent_data(request)
+        return super().put(request, *args, **kwargs)
 
 
 class JSONFieldListEndpointMixin(JSONFieldsEndpoint):
@@ -41,9 +55,5 @@ class JSONFieldListEndpointMixin(JSONFieldsEndpoint):
         return serialized_objects
 
     def post(self, request, *args, **kwargs):
-        for field_name, geometry_type in self.get_json_fields_and_types():
-            value = request.data.get(field_name, None)
-            if value:
-                request.data[field_name] = json.dumps(value)
-
+        self.treat_sent_data(request)
         return super().post(request, *args, **kwargs)
