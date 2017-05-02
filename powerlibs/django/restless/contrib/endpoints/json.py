@@ -16,7 +16,6 @@ class JSONFieldsEndpoint():
 
 
 class JSONFieldDetailEndpointMixin(JSONFieldsEndpoint):
-    # Placeholder for the day we actualy use a PATCH method.
     def get(self, request, *args, **kwargs):
         serialized_data = super().get(request, *args, **kwargs)
 
