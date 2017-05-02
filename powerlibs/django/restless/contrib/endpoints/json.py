@@ -40,10 +40,20 @@ class JSONFieldListEndpointMixin(JSONFieldsEndpoint):
 
         return serialized_objects
 
-    def post(self, request, *args, **kwargs):
+    def treat_sent_data(self, request):
         for field_name, geometry_type in self.get_json_fields_and_types():
             value = request.data.get(field_name, None)
             if value:
                 request.data[field_name] = json.dumps(value)
 
+    def post(self, request, *args, **kwargs):
+        self.treat_sent_data(request)
         return super().post(request, *args, **kwargs)
+
+    def patch(self, request, *args, **kwargs):
+        self.treat_sent_data(request)
+        return super().patch(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        self.treat_sent_data(request)
+        return super().put(request, *args, **kwargs)
