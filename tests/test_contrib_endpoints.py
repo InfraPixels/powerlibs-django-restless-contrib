@@ -31,7 +31,6 @@ def test_filtered_endpoint_mixin(filtered_endpoint):
 def test_filtered_endpoint_mixin_model_fields_property(original_filtered_endpoint):
     fields = original_filtered_endpoint.model_fields
     assert len(fields) == 2
-    print(fields)
     assert fields[0] == 'id'
     assert fields[1] == 'name'
 

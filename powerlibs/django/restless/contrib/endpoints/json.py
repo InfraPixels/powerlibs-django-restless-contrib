@@ -9,9 +9,13 @@ class JSONFieldsEndpoint():
                 yield (field.name, class_name)
 
     def treat_sent_data(self, request):
-        for field_name, geometry_type in self.get_json_fields_and_types():
-            value = request.data.get(field_name, None)
-            if value:
+        for field_name, _ in self.get_json_fields_and_types():
+            try:
+                value = request.data[field_name]
+            except KeyError:
+                continue
+
+            if value is not None:
                 request.data[field_name] = json.dumps(value)
 
 
