@@ -26,6 +26,17 @@ class PaginatedEndpointMixin:
         }
 
 
+class OrderedEndpointMixin:
+    def get_query_set(self, request, *args, **kwargs):
+        queryset = super().get_query_set(request, *args, **kwargs)
+
+        if '_orderby' in request.GET:
+            orderby_field = request.GET['_orderby']
+            queryset = queryset.order_by(orderby_field)
+
+        return queryset
+
+
 class FilteredEndpointMixin:
     @cached_property
     def model_fields(self):
