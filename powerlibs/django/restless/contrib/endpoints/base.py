@@ -1,5 +1,3 @@
-from cached_property import cached_property
-
 from django.conf import settings
 
 
@@ -38,23 +36,32 @@ class OrderedEndpointMixin:
 
 
 class FilteredEndpointMixin:
-    @cached_property
-    def model_fields(self):
-        return tuple(f.name for f in self.model._meta.fields)
-
     def get_query_set(self, request, *args, **kwargs):
         queryset = super().get_query_set(request, *args, **kwargs)
 
         filter_args = {}
+        exclude_filter_args = {}
+
         for key, value in request.GET.items():
             if key.startswith('_'):
                 continue
 
-            field_name = key.split('__')[0]
-            if field_name in self.model_fields:
-                filter_args[key] = value
+            args_list = filter_args
 
-        return queryset.filter(**filter_args)
+            try:
+                potential_operator = key.split('__')[1]
+            except IndexError:
+                pass
+            else:
+                if potential_operator == 'in':
+                    value = value.split(',')
+                elif potential_operator == 'not_in':
+                    value = value.split(',')
+                    args_list = exclude_filter_args
+
+            args_list[key] = value
+
+        return queryset.filter(**filter_args).exclude(**exclude_filter_args)
 
 
 class SoftDeletableDetailEndpointMixin:
