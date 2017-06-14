@@ -23,14 +23,24 @@ class NestedEntitiesDetailEndpointMixin(NestedEntitiesMixin):
         if nesting_request:
             serialized_data['_related'] = related_entities = {}
             instance = self.get_instance(request, *args, **kwargs)
+
             for entity_name in nesting_request.split(','):
                 if entity_name in self.foreign_keys:
                     entity = getattr(instance, entity_name)
                     try:
-                        serialized_entity = entity.serialize()
+                        serialized_entity = serialize_model(entity)
                     except AttributeError:
                         serialized_entity = serialize_model(entity)
                     related_entities[entity_name] = serialized_entity
+                    continue
+
+                field = getattr(instance, entity_name, None)
+
+                if field and field.__class__.__name__ == 'ManyRelatedManager':
+                    the_list = related_entities[entity_name] = []
+
+                    for entity in field.all():
+                        the_list.append(serialize_model(entity))
 
         return serialized_data
 
@@ -54,15 +64,28 @@ class NestedEntitiesListEndpointMixin(NestedEntitiesMixin):
             item['_related'] = related_entities = {}
 
             for entity_name in nesting_request.split(','):
+
                 if entity_name in self.foreign_keys:
                     field = getattr(self.model, entity_name)
                     entity_id = item[entity_name]
 
                     entity = field.get_queryset().get(id=entity_id)
                     try:
-                        serialized_entity = entity.serialize()
+                        serialized_entity = serialize_model(entity)
                     except AttributeError:
                         serialized_entity = serialize_model(entity)
                     related_entities[entity_name] = serialized_entity
+                    continue
+
+                field = getattr(self.model, entity_name, None)
+
+                if field and field.__class__.__name__ == 'ManyToManyDescriptor':
+                    the_list = related_entities[entity_name] = []
+
+                    item_entity = self.model.objects.filter(id=item['id']).prefetch_related(entity_name)[0]
+                    manager = getattr(item_entity, entity_name)
+
+                    for entity in manager.all():
+                        the_list.append(serialize_model(entity))
 
         return results
