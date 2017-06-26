@@ -28,13 +28,6 @@ def test_filtered_endpoint_mixin(filtered_endpoint):
     assert queryset[0].id == get_parameters['id']
 
 
-def test_filtered_endpoint_mixin_model_fields_property(original_filtered_endpoint):
-    fields = original_filtered_endpoint.model_fields
-    assert len(fields) == 2
-    assert fields[0] == 'id'
-    assert fields[1] == 'name'
-
-
 def test_soft_deletable_detail_endpoint_mixin(soft_deletable_detail_endpoint):
     soft_deletable_detail_endpoint.delete(None)
     assert soft_deletable_detail_endpoint.instance.deleted is True

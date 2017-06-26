@@ -26,6 +26,16 @@ class MockedQuerySet(list):
 
         return MockedQuerySet(results)
 
+    def exclude(self, **kwargs):
+        for item in self:
+            for key, expected_value in kwargs.items():
+                value = getattr(item, key)
+                if value == expected_value:
+                    self.remove(item)
+                    break
+
+        return self
+
 
 @pytest.fixture
 def instances():
@@ -86,7 +96,7 @@ class ListEndpoint(DetailEndpoint):
 @pytest.fixture
 def filtered_endpoint():
     class MyClass(FilteredEndpointMixin, Endpoint):
-        model_fields = ('id', 'username', 'email')
+        pass
 
     return MyClass()
 
