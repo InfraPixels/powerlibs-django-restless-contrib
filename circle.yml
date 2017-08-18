@@ -11,8 +11,7 @@ test:
         - flake8 -v --ignore=E501 powerlibs/
 
     override:
-        - pip install -U "git+file://$PWD"
-        - mv powerlibs x && PYTHONPATH=. py.test
+        - bin/run-tests.sh
         - cp .coverage $CIRCLE_ARTIFACTS/
         - mv htmlcov/ $CIRCLE_ARTIFACTS/
         - coverage-badge -o $CIRCLE_ARTIFACTS/coverage.svg

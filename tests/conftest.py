@@ -62,9 +62,9 @@ class DetailEndpoint(Endpoint):
     field_1.configure_mock(name='id')
     field_2 = mock.Mock()
     field_2.configure_mock(name='name')
+
     related_model = mock.Mock()
     related_model.configure_mock(name='related_model')
-
     foreign_keys = ['related_model']
 
     get = mock.Mock(return_value={
