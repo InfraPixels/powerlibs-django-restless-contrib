@@ -13,7 +13,6 @@ class ArrayFieldsEndpoint():
                 continue
 
             if value is not None:
-                print('treat_sent_data:', field_name, value)
                 request.data[field_name] = ','.join(value)
 
 

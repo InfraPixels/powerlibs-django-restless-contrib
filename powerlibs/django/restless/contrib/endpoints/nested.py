@@ -76,6 +76,10 @@ class NestedEntitiesListEndpointMixin(NestedEntitiesMixin):
                     field = getattr(self.model, entity_name)
                     entity_id = item[entity_name]
 
+                    if not entity_id:
+                        related_entities[entity_name] = None
+                        continue
+
                     entity = field.get_queryset().get(id=entity_id)
                     serialized_entity = serialize_model(entity, exclude=self.get_hidden_fields(entity._meta.model))
                     related_entities[entity_name] = serialized_entity
