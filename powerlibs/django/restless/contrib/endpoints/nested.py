@@ -37,7 +37,12 @@ class NestedEntitiesDetailEndpointMixin(NestedEntitiesMixin):
             for entity_name in nesting_request.split(','):
                 if entity_name in self.foreign_keys:
                     entity = getattr(instance, entity_name)
-                    serialized_entity = serialize_model(entity, exclude=self.get_hidden_fields(entity._meta.model))
+
+                    if entity:
+                        serialized_entity = serialize_model(entity, exclude=self.get_hidden_fields(entity._meta.model))
+                    else:
+                        serialized_entity = None
+
                     related_entities[entity_name] = serialized_entity
                     continue
 
