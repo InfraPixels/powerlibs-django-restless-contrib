@@ -12,6 +12,3 @@ test:
 
     override:
         - bin/run-tests.sh
-        - cp .coverage $CIRCLE_ARTIFACTS/
-        - mv htmlcov/ $CIRCLE_ARTIFACTS/
-        - coverage-badge -o $CIRCLE_ARTIFACTS/coverage.svg

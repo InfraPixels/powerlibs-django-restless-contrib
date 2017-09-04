@@ -1,4 +1,7 @@
 from django.conf import settings
+from django.core.exceptions import FieldError
+
+from powerlibs.django.restless.http import Http400
 
 
 class PaginatedEndpointMixin:
@@ -28,9 +31,12 @@ class OrderedEndpointMixin:
     def get_query_set(self, request, *args, **kwargs):
         queryset = super().get_query_set(request, *args, **kwargs)
 
-        if '_orderby' in request.GET:
-            orderby_field = request.GET['_orderby']
-            queryset = queryset.order_by(orderby_field)
+        orderby_field = request.GET.get('_orderby', None)
+        if orderby_field:
+            try:
+                queryset = queryset.order_by(orderby_field)
+            except FieldError as ex:
+                return Http400("FieldError: {}".format(ex))
 
         return queryset
 
