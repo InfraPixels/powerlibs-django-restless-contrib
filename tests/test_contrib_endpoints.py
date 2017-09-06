@@ -1,5 +1,7 @@
 from unittest import mock
 
+from powerlibs.django.restless.http import Http400
+
 
 def test_paginated_endpoint_mixin(paginated_endpoint):
     mocked_request = mock.Mock(GET={'_limit': 2, '_offset': 1})
@@ -45,3 +47,26 @@ def test_soft_deletable_list_endpoint(soft_deletable_list_endpoint):
     assert qs[0].deleted is False
     assert qs[1].deleted is False
     assert qs[2].deleted is False
+
+
+def test_ordered_list_endpoint(ordered_list_endpoint):
+    get_parameters = {
+        '_orderby': 'id'
+    }
+
+    mocked_request = mock.Mock(GET=get_parameters)
+    qs = ordered_list_endpoint.get_query_set(mocked_request)
+
+    assert qs[0].id < qs[1].id
+
+
+def test_ordered_list_endpoint_with_invalid_field_name(ordered_list_endpoint):
+    get_parameters = {
+        '_orderby': 'invalid_field'
+    }
+
+    mocked_request = mock.Mock(GET=get_parameters)
+
+    response = ordered_list_endpoint.get_query_set(mocked_request)
+
+    assert isinstance(response, Http400)

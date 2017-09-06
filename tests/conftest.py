@@ -1,7 +1,10 @@
 import pytest
 from unittest import mock
+from django.core.exceptions import FieldError
 
-from powerlibs.django.restless.contrib.endpoints import PaginatedEndpointMixin, FilteredEndpointMixin, SoftDeletableDetailEndpointMixin, SoftDeletableListEndpointMixin
+from powerlibs.django.restless.contrib.endpoints import (PaginatedEndpointMixin, FilteredEndpointMixin,
+                                                         SoftDeletableDetailEndpointMixin, SoftDeletableListEndpointMixin,
+                                                         OrderedEndpointMixin)
 from powerlibs.django.restless.contrib.endpoints.nested import NestedEntitiesDetailEndpointMixin, NestedEntitiesListEndpointMixin
 
 
@@ -15,6 +18,14 @@ class MockedQuerySet(list):
             return MockedQuerySet(results)
         else:
             return results
+
+    def order_by(self, key):
+        if key not in ('id', 'deleted'):
+            raise FieldError('No such field')
+
+        unordered = super().__getitem__(slice(0, None))
+        ordered = sorted(unordered, key=lambda x: getattr(x, key))
+        return MockedQuerySet(ordered)
 
     def filter(self, **kwargs):
         results = []
@@ -163,6 +174,15 @@ def nested_list_endpoint():
 @pytest.fixture
 def nested_detail_endpoint():
     class MyClass(NestedEntitiesDetailEndpointMixin, DetailEndpoint):
+        pass
+
+    obj = MyClass()
+    return obj
+
+
+@pytest.fixture
+def ordered_list_endpoint():
+    class MyClass(OrderedEndpointMixin, DetailEndpoint):
         pass
 
     obj = MyClass()
