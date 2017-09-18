@@ -29,7 +29,9 @@ class JSONFieldDetailEndpointMixin(JSONFieldsEndpoint):
         return serialized_data
 
     def patch(self, request, *args, **kwargs):
-        self.treat_sent_data(request)
+        # We don't need to "treat" sent data, since
+        # the PATCH method is implements without any
+        # serialization involved.
         return super().patch(request, *args, **kwargs)
 
     def put(self, request, *args, **kwargs):
