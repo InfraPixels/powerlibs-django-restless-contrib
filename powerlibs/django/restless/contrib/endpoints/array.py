@@ -13,7 +13,7 @@ class ArrayFieldsEndpoint():
                 continue
 
             if value is not None:
-                request.data[field_name] = ','.join(value)
+                request.data[field_name] = ','.join(str(value))
 
 
 class ArrayFieldDetailEndpointMixin(ArrayFieldsEndpoint):
