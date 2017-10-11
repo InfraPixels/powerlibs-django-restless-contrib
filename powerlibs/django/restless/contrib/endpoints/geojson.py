@@ -35,7 +35,14 @@ class GeoJSONListEndpointMixin(GeoJSONEndpointMixin):
                 new_field_name = geometry_field_name + '__geojson'
 
                 value = obj[geometry_field_name]
-                _, feature_str = value.split(';')
+
+                if value is None:
+                    obj[new_field_name] = value
+                    continue
+
+                feature_str = value
+                if ';' in feature_str:
+                    _, feature_str = value.split(';')
                 feature = shapely.wkt.loads(feature_str)
                 obj[new_field_name] = shapely.geometry.mapping(feature)
 
