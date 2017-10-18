@@ -20,7 +20,8 @@ class GeoJSONDetailEndpointMixin(GeoJSONEndpointMixin):
         for geometry_field_name, geometry_type in self.get_geometry_fields_and_types():
             new_field_name = geometry_field_name + '__geojson'
             value = getattr(instance, geometry_field_name)
-            serialized_data[new_field_name] = json.loads(value.geojson)
+            if value:
+                serialized_data[new_field_name] = json.loads(value.geojson)
 
         return serialized_data
 
