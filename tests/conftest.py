@@ -7,6 +7,8 @@ from powerlibs.django.restless.contrib.endpoints import (PaginatedEndpointMixin,
                                                          OrderedEndpointMixin)
 from powerlibs.django.restless.contrib.endpoints.nested import NestedEntitiesDetailEndpointMixin, NestedEntitiesListEndpointMixin
 
+from powerlibs.django.restless.contrib.endpoints.json import JSONFieldDetailEndpointMixin, JSONFieldListEndpointMixin
+
 
 class MockedQuerySet(list):
     def count(self):
@@ -187,3 +189,20 @@ def ordered_list_endpoint():
 
     obj = MyClass()
     return obj
+
+
+@pytest.fixture
+def json_field_detail_endpoint():
+    testclass = type('MyClass', (JSONFieldDetailEndpointMixin, DetailEndpoint), {})
+    return testclass()
+
+
+@pytest.fixture
+def json_field_list_endpoint():
+    testclass = type('MyClass', (JSONFieldListEndpointMixin, ListEndpoint, Serializer), {})
+    return testclass()
+
+
+class Serializer():
+    def serialize(self, objects):
+        pass
