@@ -16,6 +16,7 @@ def pip_git_to_setuptools_git(url):
         )
     return url
 
+
 requires = []
 dependency_links = []
 with open('requirements/production.txt') as requirements_file:
