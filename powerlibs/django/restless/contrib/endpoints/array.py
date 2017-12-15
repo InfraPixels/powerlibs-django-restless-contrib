@@ -15,6 +15,17 @@ class ArrayFieldsEndpoint():
             if value is not None:
                 request.data[field_name] = ','.join(str(v) for v in value)
 
+    def _treat_sent_data_for_patch(self, request):
+        for field_name, _ in self.get_array_fields_and_types():
+            try:
+                value = request.data[field_name]
+            except KeyError:
+                continue
+
+            if value is not None:
+                core = ','.join(str(v) for v in value)
+                request.data[field_name] = '{' + core + '}'
+
 
 class ArrayFieldDetailEndpointMixin(ArrayFieldsEndpoint):
     def get(self, request, *args, **kwargs):
@@ -26,7 +37,7 @@ class ArrayFieldDetailEndpointMixin(ArrayFieldsEndpoint):
         return serialized_data
 
     def patch(self, request, *args, **kwargs):
-        self._treat_sent_data(request)
+        self._treat_sent_data_for_patch(request)
         return super().patch(request, *args, **kwargs)
 
     def put(self, request, *args, **kwargs):
