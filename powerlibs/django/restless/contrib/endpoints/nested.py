@@ -79,7 +79,12 @@ class NestedEntitiesListEndpointMixin(NestedEntitiesMixin):
 
                 if entity_name in self.foreign_keys:
                     field = getattr(self.model, entity_name)
-                    entity_id = item[entity_name]
+
+                    alt_name = f'{entity_name}_id'
+                    if alt_name in item:
+                        entity_id = item[alt_name]
+                    else:
+                        entity_id = item[entity_name]
 
                     if not entity_id:
                         related_entities[entity_name] = None
