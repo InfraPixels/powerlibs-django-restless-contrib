@@ -3,6 +3,8 @@ import json
 import shapely.wkt
 import shapely.geometry
 
+from powerlibs.django.restless.http import JSONResponse
+
 
 class GeoJSONEndpointMixin:
     def get_geometry_fields_and_types(self):
@@ -14,7 +16,7 @@ class GeoJSONEndpointMixin:
     def generate_geojson(self, obj):
         geometries = [(geometry_field_name, geometry_type) for geometry_field_name, geometry_type in self.get_geometry_fields_and_types()]
 
-        for geometry_field_name, geometry_type in geometries:
+        for geometry_field_name, _ in geometries:
             new_field_name = geometry_field_name + '__geojson'
 
             value = obj[geometry_field_name]
@@ -40,20 +42,21 @@ class GeoJSONEndpointMixin:
 
         return serialized_objects
 
-    def hydrate_data(self, data):
-        for geometry_field_name, geometry_type in self.get_geometry_fields_and_types():
+    def hydrate_data_geojson(self, data):
+        for geometry_field_name, _ in self.get_geometry_fields_and_types():
             field_name_as_geojson = geometry_field_name + '__geojson'
             value = data.pop(field_name_as_geojson, None)
             if value:
                 data[geometry_field_name] = shapely.geometry.asShape(value).wkt
         return data
 
+
 class GeoJSONDetailEndpointMixin(GeoJSONEndpointMixin):
     def get(self, request, *args, **kwargs):
         serialized_data = self.serialize(self.get_instance(request, *args, **kwargs))
 
         instance = self.get_instance(request, *args, **kwargs)
-        for geometry_field_name, geometry_type in self.get_geometry_fields_and_types():
+        for geometry_field_name, _ in self.get_geometry_fields_and_types():
             new_field_name = geometry_field_name + '__geojson'
             value = getattr(instance, geometry_field_name)
             if value:
@@ -62,15 +65,36 @@ class GeoJSONDetailEndpointMixin(GeoJSONEndpointMixin):
         return serialized_data
 
     def put(self, request, *args, **kwargs):
-        self.hydrate_data(request.data)
-        return super().put(request, *args, **kwargs)
+        self.hydrate_data_geojson(request.data)
+        return self.hydrate_output_geojson(super().put(request, *args, **kwargs))
 
     def patch(self, request, *args, **kwargs):
-        self.hydrate_data(request.data)
-        return super().patch(request, *args, **kwargs)
+        self.hydrate_data_geojson(request.data)
+        return self.hydrate_output_geojson(super().patch(request, *args, **kwargs))
+
+    def hydrate_output_geojson(self, response):
+        if isinstance(response, JSONResponse):
+            serialized_data = json.loads(response.content)
+            for geometry_field_name, _ in self.get_geometry_fields_and_types():
+                new_field_name = geometry_field_name + '__geojson'
+                value = serialized_data.get(geometry_field_name, None)
+                if value is None:
+                    serialized_data[new_field_name] = None
+                elif isinstance(value, str):
+
+                    v = value
+                    if ';' in value:
+                        v = value.split(';')[1]
+                    feature = shapely.wkt.loads(v)
+                    serialized_data[new_field_name] = shapely.geometry.mapping(feature)
+                else:
+                    serialized_data[new_field_name] = json.loads(value.geojson)
+            response.content = json.dumps(serialized_data)
+
+        return response
 
 
 class GeoJSONListEndpointMixin(GeoJSONEndpointMixin):
     def post(self, request, *args, **kwargs):
-        self.hydrate_data(request.data)
+        self.hydrate_data_geojson(request.data)
         return super().post(request, *args, **kwargs)

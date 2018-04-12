@@ -1,3 +1,8 @@
+import json
+
+from powerlibs.django.restless.http import JSONResponse
+
+
 class ArrayFieldsEndpoint():
     def get_array_fields_and_types(self):
         for field in self.model._meta.fields:
@@ -29,20 +34,34 @@ class ArrayFieldsEndpoint():
 
 class ArrayFieldDetailEndpointMixin(ArrayFieldsEndpoint):
     def get(self, request, *args, **kwargs):
-        serialized_data = super().get(request, *args, **kwargs)
-
-        for field_name, field_type in self.get_array_fields_and_types():
-            serialized_data[field_name] = eval(serialized_data[field_name])
-
-        return serialized_data
+        return self.hydrate_data_arrayfield(super().get(request, *args, **kwargs))
 
     def patch(self, request, *args, **kwargs):
         self._treat_sent_data_for_patch(request)
-        return super().patch(request, *args, **kwargs)
+        return self.hydrate_data_arrayfield(super().patch(request, *args, **kwargs))
 
     def put(self, request, *args, **kwargs):
         self._treat_sent_data(request)
-        return super().put(request, *args, **kwargs)
+        return self.hydrate_data_arrayfield(super().put(request, *args, **kwargs))
+
+    def do_hydrate_data_arrayfield(self, serialized_data):
+        for field_name, _ in self.get_array_fields_and_types():
+            if field_name in serialized_data:
+                value = serialized_data[field_name]
+                if isinstance(value, str):
+                    if value.startswith('{') and value.endswith('}'):
+                        serialized_data[field_name] = value[1:-1].split(',')
+                    else:
+                        serialized_data[field_name] = eval(value)
+
+    def hydrate_data_arrayfield(self, response):
+        if isinstance(response, JSONResponse):
+            serialized_data = json.loads(response.content)
+            self.do_hydrate_data_arrayfield(serialized_data)
+            response.content = json.dumps(serialized_data)
+        elif isinstance(response, dict):
+            self.do_hydrate_data_arrayfield(response)
+        return response
 
 
 class ArrayFieldListEndpointMixin(ArrayFieldsEndpoint):
