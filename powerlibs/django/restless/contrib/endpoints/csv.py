@@ -2,6 +2,8 @@ import csv
 from io import StringIO
 import json
 
+from django.http import HttpResponse
+
 from powerlibs.django.restless.http import JSONResponse
 
 
@@ -26,13 +28,14 @@ class CSVListEndpointMixin:
         csv_writer.writerows(results)
 
         the_buffer.seek(0)
-        return the_buffer.read()
+        body = the_buffer.read()
+        return HttpResponse(body, content_type='text/csv')
 
     def get(self, request, *args, **kwargs):
         response = super().get(request, *args, **kwargs)
 
         accept = request.META.get('accept', None)
-        if 'text/csv' in accept:
+        if accept is not None and 'text/csv' in accept:
 
             if isinstance(response, JSONResponse):
                 serialized_data = json.loads(response.content)
@@ -44,6 +47,9 @@ class CSVListEndpointMixin:
                 response.content = json.dumps(csv_data)
 
             elif isinstance(response, dict):
-                response = self.to_csv(response)
+                if 'results' in response:
+                    response = self.to_csv(response['results'])
+                else:
+                    response = self.to_csv(response)
 
         return response
