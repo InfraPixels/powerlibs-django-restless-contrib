@@ -25,6 +25,7 @@ class CSVListEndpointMixin:
         the_buffer = StringIO()
 
         csv_writer = csv.DictWriter(the_buffer, fieldnames=fieldnames)
+        csv_writer.writeheader()
         csv_writer.writerows(results)
 
         the_buffer.seek(0)
@@ -34,7 +35,7 @@ class CSVListEndpointMixin:
     def get(self, request, *args, **kwargs):
         response = super().get(request, *args, **kwargs)
 
-        accept = request.META.get('accept', None)
+        accept = request.META.get('Accept', None)
         if accept is not None and 'text/csv' in accept:
 
             if isinstance(response, JSONResponse):
