@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.core.exceptions import FieldError
 
 from powerlibs.django.restless.http import Http400
@@ -6,18 +5,20 @@ from powerlibs.django.restless.http import Http400
 
 class PaginatedEndpointMixin:
     def get(self, request, *args, **kwargs):
-        limit = int(request.GET.get('_limit') or settings.DEFAULT_PAGE_SIZE)
+        limit = int(request.GET.get('_limit') or 0)
         offset = int(request.GET.get('_offset') or 0)
-
-        begin = offset
-        end = begin + limit
 
         qs = self.get_query_set(request, *args, **kwargs)
         total = qs.count()
+        if limit == 0:
+            paginated_qs = qs
+        else:
+            begin = offset
+            end = begin + limit
 
-        paginated_qs = qs[begin:end]
+            paginated_qs = qs[begin:end]
+
         count = paginated_qs.count()
-
         serialized_results = self.serialize(paginated_qs)
 
         return {
