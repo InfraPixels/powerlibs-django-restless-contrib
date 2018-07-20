@@ -29,7 +29,12 @@ class GeoJSONEndpointMixin:
             if ';' in feature_str:
                 _, feature_str = value.split(';')
             feature = shapely.wkt.loads(feature_str)
-            obj[new_field_name] = shapely.geometry.mapping(feature)
+
+            geojson = shapely.geometry.mapping(feature)
+            if len(str(geojson)) > (262144 / 3):
+                obj[new_field_name] = None
+            else:
+                obj[new_field_name] = geojson
 
     def serialize(self, objects):
         serialized_objects = super().serialize(objects)
