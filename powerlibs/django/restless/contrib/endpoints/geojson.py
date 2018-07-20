@@ -6,6 +6,9 @@ import shapely.geometry
 from powerlibs.django.restless.http import JSONResponse
 
 
+SQS_MAX_MESSAGE_SIZE = 262144
+
+
 class GeoJSONEndpointMixin:
     def get_geometry_fields_and_types(self):
         for field in self.model._meta.fields:
@@ -21,6 +24,9 @@ class GeoJSONEndpointMixin:
 
             value = obj[geometry_field_name]
 
+            if len(str(value)) > SQS_MAX_MESSAGE_SIZE / 3:
+                obj[geometry_field_name] = None
+
             if value is None:
                 obj[new_field_name] = value
                 continue
@@ -31,7 +37,7 @@ class GeoJSONEndpointMixin:
             feature = shapely.wkt.loads(feature_str)
 
             geojson = shapely.geometry.mapping(feature)
-            if len(str(geojson)) > (262144 / 3):
+            if len(str(geojson)) > (SQS_MAX_MESSAGE_SIZE / 3):
                 obj[new_field_name] = None
             else:
                 obj[new_field_name] = geojson
