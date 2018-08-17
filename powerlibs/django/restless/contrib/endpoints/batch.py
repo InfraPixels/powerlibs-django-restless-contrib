@@ -69,7 +69,6 @@ class BatchOperationsMixin:
         deleted_ids = []
 
         for instance in queryset:
-            instance = self.get_instance(request, *args, **kwargs)
             instance.delete()
             deleted_ids.append(instance.pk)
 
