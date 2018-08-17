@@ -10,7 +10,7 @@ class BatchOperationsMixin:
         # stupid front-end mistakes, like forgetting to append
         # the object ID at the end of the URL:
         batch_enabled = request.GET.get('_batch', None)
-        if batch_enabled.lower() != 'true':
+        if batch_enabled is None or str(batch_enabled).lower() != 'true':
             raise HttpError(405, 'Method Not Allowed')
 
         queryset = super().get_query_set(request, *args, **kwargs)
@@ -60,7 +60,7 @@ class BatchOperationsMixin:
         # stupid front-end mistakes, like forgetting to append
         # the object ID at the end of the URL:
         batch_enabled = request.GET.get('_batch', None)
-        if batch_enabled.lower() != 'true':
+        if batch_enabled is None or str(batch_enabled).lower() != 'true':
             raise HttpError(405, 'Method Not Allowed')
 
         queryset = super().get_query_set(request, *args, **kwargs)
