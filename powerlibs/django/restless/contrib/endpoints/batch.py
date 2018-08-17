@@ -69,8 +69,8 @@ class BatchOperationsMixin:
         deleted_ids = []
 
         for instance in queryset:
-            instance.delete()
             deleted_ids.append(instance.pk)
+            instance.delete()
 
         return {
             'count': count,
