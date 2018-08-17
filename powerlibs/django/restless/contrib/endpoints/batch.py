@@ -6,6 +6,13 @@ class BatchOperationsMixin:
         if 'PATCH' not in self.methods:
             raise HttpError(405, 'Method Not Allowed')
 
+        # This is to avoid screwing up the database because of
+        # stupid front-end mistakes, like forgetting to append
+        # the object ID at the end of the URL:
+        batch_enabled = request.GET.get('_batch', None)
+        if batch_enabled.lower() != 'true':
+            raise HttpError(405, 'Method Not Allowed')
+
         queryset = super().get_query_set(request, *args, **kwargs)
         count = queryset.count()
 
@@ -44,3 +51,29 @@ class BatchOperationsMixin:
             'failed_ids': failed_ids,
             'failed_count': len(failed_ids)
         })
+
+    def delete(self, request, *args, **kwargs):
+        if 'DELETE' not in self.methods:
+            raise HttpError(405, 'Method Not Allowed')
+
+        # This is to avoid screwing up the database because of
+        # stupid front-end mistakes, like forgetting to append
+        # the object ID at the end of the URL:
+        batch_enabled = request.GET.get('_batch', None)
+        if batch_enabled.lower() != 'true':
+            raise HttpError(405, 'Method Not Allowed')
+
+        queryset = super().get_query_set(request, *args, **kwargs)
+        count = queryset.count()
+
+        deleted_ids = []
+
+        for instance in queryset:
+            instance = self.get_instance(request, *args, **kwargs)
+            instance.delete()
+            deleted_ids.append(instance.pk)
+
+        return {
+            'count': count,
+            'deleted_ids': deleted_ids,
+        }
