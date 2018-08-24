@@ -1,7 +1,7 @@
 from django.core.exceptions import FieldError
 from django.core.validators import ValidationError
 
-from powerlibs.django.restless.http import Http400
+from powerlibs.django.restless.http import Http400, HttpError
 
 
 class PaginatedEndpointMixin:
@@ -101,6 +101,6 @@ class BaseEndpointMixin:
         try:
             queryset = super().get_query_set(request, *args, **kwargs)
         except ValidationError as ex:
-            return Http400("ValidationError: {}".format(ex))
+            raise HttpError(400, f"ValidationError: {ex}")
 
         return queryset
