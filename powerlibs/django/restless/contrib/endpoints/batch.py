@@ -16,40 +16,22 @@ class BatchOperationsMixin:
         queryset = super().get_query_set(request, *args, **kwargs)
         count = queryset.count()
 
-        modified_ids = []
-        failed_ids = {}
+        affected_ids = [item.id for item in queryset]
 
-        for instance in queryset:
-            changed = False
-            try:
-                for key, value in request.data.items():
-                    old_value = getattr(instance, key, None)
-                    if value != old_value:
-                        setattr(instance, key, value)
-                        changed = True
+        data = dict(request.data)
+        data.pop('organization', None)
+        data.pop('organization_id', None)
+        data.pop('created_by', None)
+        data.pop('created_by_id', None)
+        data.pop('updated_by', None)
+        data.pop('updated_by_id', None)
 
-                if changed:
-                    instance.save()
-
-            except Exception as ex:
-                the_type = ex.__class__.__name__
-                failed_ids[instance.pk] = {
-                    'error': the_type,
-                    'message': f'{the_type}: {ex}',
-                    'text': str(ex)
-                }
-                continue
-
-            else:
-                if changed:
-                    modified_ids.append(instance.pk)
+        queryset.all().update(**data)
 
         return Http200({
             'count': count,
-            'modified_ids': modified_ids,
-            'modified_count': len(modified_ids),
-            'failed_ids': failed_ids,
-            'failed_count': len(failed_ids)
+            'affected_ids': affected_ids,
+            'affected_ids_count': len(affected_ids),
         })
 
     def delete(self, request, *args, **kwargs):
@@ -66,13 +48,11 @@ class BatchOperationsMixin:
         queryset = super().get_query_set(request, *args, **kwargs)
         count = queryset.count()
 
-        deleted_ids = []
+        affected_ids = [item.id for item in queryset]
 
-        for instance in queryset:
-            deleted_ids.append(instance.pk)
-            instance.delete()
+        queryset.all().delete()
 
         return {
             'count': count,
-            'deleted_ids': deleted_ids,
+            'affected_ids': affected_ids,
         }
