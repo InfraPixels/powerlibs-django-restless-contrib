@@ -1,4 +1,5 @@
 from django.core.exceptions import FieldError
+from django.core.validators import ValidationError
 
 from powerlibs.django.restless.http import Http400
 
@@ -93,3 +94,13 @@ class SoftDeletableListEndpointMixin:
     def get_query_set(self, request, *args, **kwargs):
         queryset = super().get_query_set(request, *args, **kwargs)
         return queryset.filter(deleted=False)
+
+
+class BaseEndpointMixin:
+    def get_query_set(self, request, *args, **kwargs):
+        try:
+            queryset = super().get_query_set(request, *args, **kwargs)
+        except ValidationError as ex:
+            return Http400("ValidationError: {}".format(ex))
+
+        return queryset
