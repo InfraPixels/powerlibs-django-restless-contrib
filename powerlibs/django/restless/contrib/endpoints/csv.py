@@ -23,9 +23,11 @@ class CSVListEndpointMixin:
         json_keys = set()
         for json_field in json_fields:
             for entry in entries:
-                for key in entry[json_field].keys():
-                    key_name = f'{json_field}.{key}'
-                    json_keys.add(key_name)
+                value = entry[json_field]
+                if isinstance(value, dict):
+                    for key in value.keys():
+                        key_name = f'{json_field}.{key}'
+                        json_keys.add(key_name)
         return json_keys
 
     def hydrate_results_with_json_fields(self, results):
