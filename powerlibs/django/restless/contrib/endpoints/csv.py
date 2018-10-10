@@ -34,13 +34,19 @@ class CSVListEndpointMixin:
         json_fields = list(self.get_json_fields())
         for json_field in json_fields:
             for entry in results:
-                for key in entry[json_field].keys():
-                    key_name = f'{json_field}.{key}'
-                    entry[key_name] = entry[json_field][key]
+                value = entry[json_field]
+                if isinstance(value, dict):
+                    for key in value.keys():
+                        key_name = f'{json_field}.{key}'
+                        entry[key_name] = entry[json_field][key]
 
     def get_csv_fieldnames(self, entries):
         if self._csv_fieldnames is None:
-            self._csv_fieldnames = list(key for key in entries[0].keys())
+            value = entries[0]
+            if isinstance(value, dict):
+                self._csv_fieldnames = list(key for key in entries[0].keys())
+            else:
+                self._csv_fieldnames = []
             self._csv_fieldnames.extend(self.get_json_fieldnames(entries))
 
         return self._csv_fieldnames
