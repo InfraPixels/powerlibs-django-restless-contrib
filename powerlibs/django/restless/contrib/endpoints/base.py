@@ -67,6 +67,9 @@ class FilteredEndpointMixin:
                     value = value.split(',')
                     key = key.replace('not_in', 'in')
                     args_list = exclude_filter_args
+                elif potential_operator == 'ne':
+                    key = key.replace('__ne', '')
+                    args_list = exclude_filter_args
 
             if value == 'True':
                 value = True
