@@ -97,20 +97,20 @@ class FilteredEndpointMixin:
             exclude_clauses.append(exclude_filter_args)
 
         if filter_clauses:
-            filter_Qs = Q(filter_clauses[0])
+            filter_Qs = Q(**filter_clauses[0])
             for clause in filter_clauses[1:]:
-                filter_Qs |= Q(clause)
+                filter_Qs |= Q(**clause)
         else:
             filter_Qs = {}
 
         if exclude_clauses:
-            exclude_filter_Qs = Q(exclude_clauses[0])
+            exclude_filter_Qs = Q(**exclude_clauses[0])
             for clause in exclude_clauses[1:]:
-                exclude_filter_Qs |= Q(clause)
+                exclude_filter_Qs |= Q(**clause)
         else:
             exclude_filter_Qs = {}
 
-        return queryset.filter(**filter_Qs).exclude(**exclude_filter_Qs)
+        return queryset.filter(filter_Qs).exclude(exclude_filter_Qs)
 
 
 class SoftDeletableDetailEndpointMixin:
