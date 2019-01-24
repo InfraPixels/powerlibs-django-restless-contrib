@@ -101,14 +101,14 @@ class FilteredEndpointMixin:
             for clause in filter_clauses[1:]:
                 filter_Qs |= Q(**clause)
         else:
-            filter_Qs = {}
+            filter_Qs = Q()
 
         if exclude_clauses:
             exclude_filter_Qs = Q(**exclude_clauses[0])
             for clause in exclude_clauses[1:]:
                 exclude_filter_Qs |= Q(**clause)
         else:
-            exclude_filter_Qs = {}
+            exclude_filter_Qs = Q()
 
         return queryset.filter(filter_Qs).exclude(exclude_filter_Qs)
 
