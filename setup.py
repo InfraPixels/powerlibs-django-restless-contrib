@@ -5,7 +5,7 @@ try:
 except ImportError:
     from distutils.core import setup
 
-version = '0.25.1'
+version = '0.25.2'
 
 
 def pip_git_to_setuptools_git(url):
