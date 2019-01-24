@@ -66,6 +66,8 @@ class FilteredEndpointMixin:
                     exclude_clauses.append(exclude_filter_args)
                     exclude_filter_args = {}
 
+                continue
+
             args_list = filter_args
 
             try:
