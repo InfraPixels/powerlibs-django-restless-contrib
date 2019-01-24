@@ -1,5 +1,6 @@
 from django.core.exceptions import FieldError
 from django.core.validators import ValidationError
+from django.db.models import Q
 
 from powerlibs.django.restless.http import Http400, HttpError
 
@@ -49,10 +50,21 @@ class FilteredEndpointMixin:
 
         filter_args = {}
         exclude_filter_args = {}
+        filter_clauses = []
+        exclude_clauses = []
 
         for key, value in request.GET.items():
             if key.startswith('_'):
                 continue
+
+            if key == 'OP' and value == 'OR':
+                if filter_args:
+                    filter_clauses.append(filter_args)
+                    filter_args = {}
+
+                if exclude_filter_args:
+                    exclude_clauses.append(exclude_filter_args)
+                    exclude_filter_args = {}
 
             args_list = filter_args
 
@@ -78,7 +90,16 @@ class FilteredEndpointMixin:
 
             args_list[key] = value
 
-        return queryset.filter(**filter_args).exclude(**exclude_filter_args)
+        if filter_args:
+            filter_clauses.append(filter_args)
+
+        if exclude_filter_args:
+            exclude_clauses.append(exclude_filter_args)
+
+        filter_Qs = [Q(clause) for clause in filter_clauses]
+        exclude_filter_Qs = [Q(clause) for clause in exclude_clauses]
+
+        return queryset.filter(**filter_Qs).exclude(**exclude_filter_Qs)
 
 
 class SoftDeletableDetailEndpointMixin:
