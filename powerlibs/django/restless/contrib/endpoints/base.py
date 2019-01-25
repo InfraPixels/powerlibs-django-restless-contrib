@@ -57,12 +57,14 @@ class FilteredEndpointMixin:
             if key.startswith('_'):
                 continue
 
-            if key == 'OP' and value == 'OR':
+            if key == 'OP':
                 if filter_args:
+                    filter_clauses.append(value)
                     filter_clauses.append(filter_args)
                     filter_args = {}
 
                 if exclude_filter_args:
+                    exclude_clauses.append(value)
                     exclude_clauses.append(exclude_filter_args)
                     exclude_filter_args = {}
 
@@ -100,15 +102,41 @@ class FilteredEndpointMixin:
 
         if filter_clauses:
             filter_Qs = Q(**filter_clauses[0])
+            operator = 'OR'
+
             for clause in filter_clauses[1:]:
-                filter_Qs |= Q(**clause)
+                if clause == 'OR':
+                    operator = 'OR'
+                    continue
+
+                if clause == 'AND':
+                    operator = 'AND'
+                    continue
+
+                if operator == 'OR':
+                    filter_Qs |= Q(**clause)
+                elif operator == 'AND':
+                    filter_Qs &= Q(**clause)
         else:
             filter_Qs = Q()
 
         if exclude_clauses:
             exclude_filter_Qs = Q(**exclude_clauses[0])
+            operator = 'OR'
+
             for clause in exclude_clauses[1:]:
-                exclude_filter_Qs |= Q(**clause)
+                if clause == 'OR':
+                    operator = 'OR'
+                    continue
+
+                if clause == 'AND':
+                    operator = 'AND'
+                    continue
+
+                if operator == 'OR':
+                    exclude_filter_Qs |= Q(**clause)
+                elif operator == 'AND':
+                    exclude_filter_Qs &= Q(**clause)
         else:
             exclude_filter_Qs = Q()
 
