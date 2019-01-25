@@ -120,6 +120,9 @@ class FilteredEndpointMixin:
                 else:
                     filter_Qs |= Q(**clause)
 
+            if filtter_Qs:
+                filter_Qs_groups.append(filter_Qs)
+
         if exclude_clauses:
             for clause in exclude_clauses:
                 if clause == 'OR':
@@ -134,6 +137,9 @@ class FilteredEndpointMixin:
                     exclude_filter_Qs = Q(**clause)
                 else:
                     exclude_filter_Qs |= Q(**clause)
+
+            if exclude_filter_Qs:
+                exclude_filter_Qs_groups.append(exclude_filter_Qs)
 
         return queryset.filter(*filter_Qs_groups).exclude(
                 *exclude_filter_Qs_groups)
