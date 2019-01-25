@@ -13,7 +13,7 @@ class AncestryEndpointMixin:
             if ancestor_id is None:
                 break
 
-            parent_object = self.model.get(id=ancestor_id)
+            parent_object = self.model.objects.get(id=ancestor_id)
             current_generation = parent_object.serialize()
             yield current_generation
 
