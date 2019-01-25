@@ -100,47 +100,43 @@ class FilteredEndpointMixin:
         if exclude_filter_args:
             exclude_clauses.append(exclude_filter_args)
 
+        filter_Qs = None
+        filter_Qs_groups = []
+        exclude_filter_Qs = None
+        exclude_filter_Qs_groups = []
+
         if filter_clauses:
-            filter_Qs = Q(**filter_clauses[0])
-            operator = 'OR'
-
-            for clause in filter_clauses[1:]:
+            for clause in filter_clauses:
                 if clause == 'OR':
-                    operator = 'OR'
                     continue
 
-                if clause == 'AND':
-                    operator = 'AND'
+                if clause == 'AND' and filter_Qs:
+                    filter_Qs_groups.append(filter_Qs)
+                    filter_Qs = None
                     continue
 
-                if operator == 'OR':
+                if filter_Qs is None:
+                    filter_Qs = Q(**clause)
+                else:
                     filter_Qs |= Q(**clause)
-                elif operator == 'AND':
-                    filter_Qs &= Q(**clause)
-        else:
-            filter_Qs = Q()
 
         if exclude_clauses:
-            exclude_filter_Qs = Q(**exclude_clauses[0])
-            operator = 'OR'
-
-            for clause in exclude_clauses[1:]:
+            for clause in exclude_clauses:
                 if clause == 'OR':
-                    operator = 'OR'
                     continue
 
-                if clause == 'AND':
-                    operator = 'AND'
+                if clause == 'AND' and exclude_filter_Qs:
+                    exclude_filter_Qs_groups.append(exclude_filter_Qs)
+                    exclude_filter_Qs = None
                     continue
 
-                if operator == 'OR':
+                if exclude_filter_Qs is None:
+                    exclude_filter_Qs = Q(**clause)
+                else:
                     exclude_filter_Qs |= Q(**clause)
-                elif operator == 'AND':
-                    exclude_filter_Qs &= Q(**clause)
-        else:
-            exclude_filter_Qs = Q()
 
-        return queryset.filter(filter_Qs).exclude(exclude_filter_Qs)
+        return queryset.filter(*filter_Qs_groups).exclude(
+                *exclude_filter_Qs_groups)
 
 
 class SoftDeletableDetailEndpointMixin:
