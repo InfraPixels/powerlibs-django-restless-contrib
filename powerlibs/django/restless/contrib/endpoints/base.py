@@ -120,7 +120,7 @@ class FilteredEndpointMixin:
                 else:
                     filter_Qs |= Q(**clause)
 
-            if filtter_Qs:
+            if filter_Qs:
                 filter_Qs_groups.append(filter_Qs)
 
         if exclude_clauses:
