@@ -57,7 +57,7 @@ class FilteredEndpointMixin:
             if key.startswith('_'):
                 continue
 
-            if key == 'OP':
+            if key == 'OP' or key.startswith('OP_'):
                 if filter_args:
                     filter_clauses.append(value)
                     filter_clauses.append(filter_args)
