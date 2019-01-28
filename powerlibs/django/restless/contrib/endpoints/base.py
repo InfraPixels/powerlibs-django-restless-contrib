@@ -108,9 +108,10 @@ class FilteredEndpointMixin:
                 if clause == 'OR':
                     continue
 
-                if clause == 'AND' and filter_Qs:
-                    queryset = queryset.filter(filter_Qs)
-                    filter_Qs = None
+                if clause == 'AND':
+                    if filter_Qs:
+                        queryset = queryset.filter(filter_Qs)
+                        filter_Qs = None
                     continue
 
                 if filter_Qs is None:
@@ -126,9 +127,10 @@ class FilteredEndpointMixin:
                 if clause == 'OR':
                     continue
 
-                if clause == 'AND' and exclude_filter_Qs:
-                    queryset = queryset.exclude(exclude_filter_Qs)
-                    exclude_filter_Qs = None
+                if clause == 'AND':
+                    if exclude_filter_Qs:
+                        queryset = queryset.exclude(exclude_filter_Qs)
+                        exclude_filter_Qs = None
                     continue
 
                 if exclude_filter_Qs is None:
