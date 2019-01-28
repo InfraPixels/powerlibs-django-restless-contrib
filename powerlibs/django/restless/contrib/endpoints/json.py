@@ -77,10 +77,13 @@ class JSONFieldListEndpointMixin(JSONFieldsEndpoint):
         self.treat_sent_data(request)
         return super().post(request, *args, **kwargs)
 
-    def get(self, request, *args, **kwargs):
+    def get_query_set(self, request, *args, **kwargs):
         for field_name, field_type in self.get_json_fields_and_types():
             value = request.GET.get(field_name, None)
             if value and value.startswith('[') and value.endswith(']'):
+                request.GET._mutable = True
                 request.GET[field_name] = value[1:-1].split(',')
+                request.GET._mutable = False
 
+    def get(self, request, *args, **kwargs):
         return super().get(request, *args, **kwargs)
