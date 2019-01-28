@@ -101,9 +101,7 @@ class FilteredEndpointMixin:
             exclude_clauses.append(exclude_filter_args)
 
         filter_Qs = None
-        filter_Qs_groups = []
         exclude_filter_Qs = None
-        exclude_filter_Qs_groups = []
 
         if filter_clauses:
             for clause in filter_clauses:
@@ -111,7 +109,7 @@ class FilteredEndpointMixin:
                     continue
 
                 if clause == 'AND' and filter_Qs:
-                    filter_Qs_groups.append(filter_Qs)
+                    queryset = queryset.filter(filter_Qs)
                     filter_Qs = None
                     continue
 
@@ -121,7 +119,7 @@ class FilteredEndpointMixin:
                     filter_Qs |= Q(**clause)
 
             if filter_Qs:
-                filter_Qs_groups.append(filter_Qs)
+                queryset = queryset.filter(filter_Qs)
 
         if exclude_clauses:
             for clause in exclude_clauses:
@@ -129,7 +127,7 @@ class FilteredEndpointMixin:
                     continue
 
                 if clause == 'AND' and exclude_filter_Qs:
-                    exclude_filter_Qs_groups.append(exclude_filter_Qs)
+                    queryset = queryset.exclude(exclude_filter_Qs)
                     exclude_filter_Qs = None
                     continue
 
@@ -139,9 +137,9 @@ class FilteredEndpointMixin:
                     exclude_filter_Qs |= Q(**clause)
 
             if exclude_filter_Qs:
-                exclude_filter_Qs_groups.append(exclude_filter_Qs)
+                queryset = queryset.exclude(exclude_filter_Qs)
 
-        return queryset.filter(*filter_Qs_groups).exclude(*exclude_filter_Qs_groups)
+        return queryset
 
 
 class SoftDeletableDetailEndpointMixin:
