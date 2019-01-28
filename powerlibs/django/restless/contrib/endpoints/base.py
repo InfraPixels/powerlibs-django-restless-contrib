@@ -59,13 +59,13 @@ class FilteredEndpointMixin:
 
             if key == 'OP' or key.startswith('OP_'):
                 if filter_args:
-                    filter_clauses.append(value)
                     filter_clauses.append(filter_args)
+                    filter_clauses.append(value)
                     filter_args = {}
 
                 if exclude_filter_args:
-                    exclude_clauses.append(value)
                     exclude_clauses.append(exclude_filter_args)
+                    exclude_clauses.append(value)
                     exclude_filter_args = {}
 
                 continue
