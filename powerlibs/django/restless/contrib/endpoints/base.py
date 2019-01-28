@@ -68,9 +68,6 @@ class FilteredEndpointMixin:
                     exclude_clauses.append(exclude_filter_args)
                     exclude_filter_args = {}
 
-                filter_clauses.append(value)
-                exclude_clauses.append(value)
-
                 continue
 
             args_list = filter_args
@@ -144,8 +141,7 @@ class FilteredEndpointMixin:
             if exclude_filter_Qs:
                 exclude_filter_Qs_groups.append(exclude_filter_Qs)
 
-        return queryset.filter(*filter_Qs_groups).exclude(
-                *exclude_filter_Qs_groups)
+        return queryset.filter(*filter_Qs_groups).exclude(*exclude_filter_Qs_groups)
 
 
 class SoftDeletableDetailEndpointMixin:
