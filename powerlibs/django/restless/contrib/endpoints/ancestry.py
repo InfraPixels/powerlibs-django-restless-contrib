@@ -25,7 +25,7 @@ class AncestryEndpointMixin:
             if isinstance(data, dict):
                 if 'results' in data:
                     results = data['results']
-                    current_ids = tuple(item['id'] for item in results)
+                    current_ids = [item['id'] for item in results]
 
                     for item in data['results']:
                         ancestors = self.get_ancestors(ancestry_field, item)
