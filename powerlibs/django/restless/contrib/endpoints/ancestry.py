@@ -42,4 +42,4 @@ class AncestryEndpointMixin:
                     ancestors = self.get_ancestors(ancestry_field, data)
                     data['_ancestors'] = list(ancestors)
 
-        rreturn data
+        return data
