@@ -79,7 +79,14 @@ class JSONFieldListEndpointMixin(JSONFieldsEndpoint):
 
     def get(self, request, *args, **kwargs):
         for field_name, field_type in self.get_json_fields_and_types():
-            value = request.GET.get(field_name, None)
+            for param_name in request.GET.keys():
+                part1 = param_name.split('__')[0]
+                if part1 == field_name:
+                    break
+            else:
+                continue
+
+            value = request.GET.get(param_name, None)
             if value and value.startswith('[') and value.endswith(']'):
                 request.GET._mutable = True
                 values = value[1:-1].split(',')
@@ -87,9 +94,9 @@ class JSONFieldListEndpointMixin(JSONFieldsEndpoint):
                 try:
                     integer_values = [int(x) for x in values]
                 except:
-                    request.GET[field_name] = values
+                    request.GET[param_name] = values
                 else:
-                    request.GET[field_name] = integer_values
+                    request.GET[param_name] = integer_values
 
                 request.GET._mutable = False
 
