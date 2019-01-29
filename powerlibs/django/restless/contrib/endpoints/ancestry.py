@@ -24,11 +24,22 @@ class AncestryEndpointMixin:
         if ancestry_field:
             if isinstance(data, dict):
                 if 'results' in data:
+                    results = data['results']
+                    current_ids = tuple(item['id'] for item in results)
+
                     for item in data['results']:
                         ancestors = self.get_ancestors(ancestry_field, item)
-                        item['_ancestors'] = list(ancestors)
+
+                        for item in ancestors:
+                            item_id = item['id']
+                            if item_id not in current_ids:
+                                results.append(item)
+                                current_ids.append(item_id)
+
+                    if 'count' in data:
+                        data['count'] = len(current_ids)
                 else:
                     ancestors = self.get_ancestors(ancestry_field, data)
                     data['_ancestors'] = list(ancestors)
 
-        return data
+        rreturn data
