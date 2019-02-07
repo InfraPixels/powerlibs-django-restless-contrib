@@ -65,7 +65,7 @@ class JSONFieldListEndpointMixin(JSONFieldsEndpoint):
                         # DjangoRestless makes a str(dict), so we can safely use a `eval`, here:
                         obj[field_name] = eval(value)
 
-        if type(serialized_objects) in (list, tuple):
+        if isinstance(serialized_objects, (list, tuple)):
             for obj in serialized_objects:
                 generate_json(obj)
         else:
