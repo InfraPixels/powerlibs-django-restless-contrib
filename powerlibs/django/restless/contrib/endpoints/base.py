@@ -7,14 +7,17 @@ from powerlibs.django.restless.http import Http400, HttpError
 
 class PaginatedEndpointMixin:
     def get(self, request, *args, **kwargs):
-        limit = int(request.GET.get('_limit', 0))
+        limit = request.GET.get('_limit', None)
         offset = int(request.GET.get('_offset', 0))
 
         qs = self.get_query_set(request, *args, **kwargs)
         total = qs.count()
 
         begin = offset
-        end = begin + limit
+        if limit is None:
+            end = None
+        else:
+            end = begin + limit
         paginated_qs = qs[begin:end]
 
         count = paginated_qs.count()
