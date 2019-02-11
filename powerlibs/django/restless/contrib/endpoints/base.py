@@ -17,7 +17,7 @@ class PaginatedEndpointMixin:
         if limit is None:
             end = None
         else:
-            end = begin + limit
+            end = begin + int(limit)
         paginated_qs = qs[begin:end]
 
         count = paginated_qs.count()
