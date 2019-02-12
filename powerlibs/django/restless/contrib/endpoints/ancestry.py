@@ -24,7 +24,7 @@ class AncestryEndpointMixin:
 
             yield current_generation
 
-    def fill_list_with_ancestors(self, data):
+    def fill_list_with_ancestors(self, data, ancestry_field):
         results = data['results']
         current_ids = [item['id'] for item in results]
         current_collection = list(data['results'])
@@ -54,7 +54,7 @@ class AncestryEndpointMixin:
         if ancestry_field:
             if isinstance(data, dict):
                 if 'results' in data:
-                    self.fill_list_with_ancestors(data)
+                    self.fill_list_with_ancestors(data, ancestry_field)
                 else:
                     ancestors = self.get_ancestors(ancestry_field, data)
                     data['_ancestors'] = list(ancestors)
