@@ -24,6 +24,29 @@ class AncestryEndpointMixin:
 
             yield current_generation
 
+    def fill_list_with_ancestors(self, data):
+        results = data['results']
+        current_ids = [item['id'] for item in results]
+        current_collection = list(data['results'])
+
+        while True:
+            ancestors_ids = [item[ancestry_field] for item in current_collection
+                    if item[ancestry_field] is not None and
+                    item[ancestry_field] not in current_ids]
+
+            if not ancestors_ids:
+                break
+
+            current_collection = []
+            for item in self.model.objects.filter(id__in=ancestors_ids):
+                serialized_item = item.serialize()
+                current_collection.append(serialized_item)
+                current_ids.append(item.id)
+                results.append(serialized_item)
+
+        if 'count' in data:
+            data['count'] = len(current_ids)
+
     def get(self, request, *args, **kwargs):
         data = super().get(request, *args, **kwargs)
 
@@ -31,31 +54,7 @@ class AncestryEndpointMixin:
         if ancestry_field:
             if isinstance(data, dict):
                 if 'results' in data:
-                    results = data['results']
-                    current_ids = [item['id'] for item in results]
-
-                    ancestors_ids = [item[ancestry_field] for item in results
-                            if item[ancestry_field] is not None]
-
-                    ancestors_cache = {}
-                    for item in self.model.objects.filter(id__in=ancestors_ids):
-                        ancestors_cache[item.id] = item.serialize()
-
-                    for item in data['results']:
-                        ancestors = self.get_ancestors(
-                            ancestry_field,
-                            item,
-                            ancestors_cache
-                        )
-
-                        for item in ancestors:
-                            item_id = item['id']
-                            if item_id not in current_ids:
-                                results.append(item)
-                                current_ids.append(item_id)
-
-                    if 'count' in data:
-                        data['count'] = len(current_ids)
+                    self.fill_list_with_ancestors(data)
                 else:
                     ancestors = self.get_ancestors(ancestry_field, data)
                     data['_ancestors'] = list(ancestors)
