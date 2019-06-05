@@ -6,11 +6,17 @@ import shapely.geometry
 from powerlibs.django.restless.http import JSONResponse
 
 
+ALLOWED_CLASSES = (
+    'PointField', 'LineStringField', 'PolygonField',
+    'MultiPointField', 'MultiLineStringField', 'MultiPolygonField',
+)
+
+
 class GeoJSONEndpointMixin:
     def get_geometry_fields_and_types(self):
         for field in self.model._meta.fields:
             class_name = field.__class__.__name__
-            if class_name in ('PointField', 'LineStringField', 'PolygonField'):
+            if class_name in ALLOWED_CLASSES:
                 yield (field.name, class_name)
 
     def generate_geojson(self, obj):
